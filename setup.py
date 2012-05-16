@@ -1,17 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+
 """
 Installation script for the vlfeat module
 """
+
 
 import sys, os
 from distutils.core import Extension, setup
 from distutils.errors import DistutilsFileError
 from distutils.command.build_ext import build_ext
+import numpy
+
 
 __version__ = '0.1.1a3'
-
 
 
 # on unix systems, try:
@@ -23,54 +26,34 @@ BOOST_PATH = None
 # your LIBBOOST_PATH is the containing directory
 LIBBOOST_PATH = None
 
-# $ find / -name arrayobject.h
-# your NUMPY_PATH is the parent directory, usually 'include/'
-NUMPY_PATH = None
+NUMPY_PATH = numpy.get_include()
 
 IncludeDirs = ['vlfeat/']
-LinkArgs = ['-msse']
+IncludeDirs.append(NUMPY_PATH)
 
+LibraryDirs = []
+LinkArgs = ['-msse2']
 
 if sys.platform == 'darwin':
-
-    noPortsError = '''
-    pyVLFeat currently only supports installation into a MacPorts
-    environment on the Mac OS X operating system. To install elsewhere
-    you will need to edit the path variables at the top of setup.py
-    '''
-
     LinkArgs.append('-lboost_python-mt')
 
     if BOOST_PATH is None:
         if os.path.exists('/usr/local/include/'):
             IncludeDirs.append('/usr/local/include/')
         else:
-            raise RuntimeError(noPortsError)
+            raise RuntimeError("BOOST_PATH")
     else:
         IncludeDirs.append(BOOST_PATH)
     
     if LIBBOOST_PATH is None:
         if os.path.exists('/usr/local/lib/'):
-            IncludeDirs.append('/usr/local/lib/')
+            LibraryDirs.append('/usr/local/lib/')
         else:
-            raise RuntimeError(noPortsError)
+            raise RuntimeError("BOOST_PATH")
     else:
-        IncludeDirs.append(LIBBOOST_PATH)
+        LibraryDirs.append(LIBBOOST_PATH)
 
-    if NUMPY_PATH is None:
-        npPath = os.path.join(sys.prefix, 'lib',
-                              'python%d.%d' % (sys.version_info[:2]),
-                              'site-packages/numpy/core/include/')
-        
-        if os.path.exists(npPath):
-            IncludeDirs.append(npPath)
-        else:
-            raise RuntimeError(noPortsError)
-    else:
-        IncludeDirs.append(NUMPY_PATH)
-        
 else:
-
     LinkArgs.append('-lboost_python-mt-py26')
 
     if BOOST_PATH is not None:
@@ -112,10 +95,12 @@ vlfeat_dep = ['vlfeat/vl/aib.h', 'vlfeat/vl/generic.h',
               'vlfeat/quickshift/vl_quickshift.h', 'vlfeat/py_vlfeat.h'
               ]
 
-LibraryDirs = None
-Libraries = None
-BuildExtension = build_ext
 CompileArgs = ['-msse2', '-O2', '-fPIC', '-w']
+
+Libraries = None
+
+BuildExtension = build_ext
+
 
 def mkExtension(name):
     modname = '_' + name.lower()
@@ -124,6 +109,7 @@ def mkExtension(name):
     return Extension(modname, src, libraries=Libraries, depends=dep,
                      include_dirs=IncludeDirs, library_dirs=LibraryDirs,
                      extra_compile_args=CompileArgs, extra_link_args=LinkArgs)
+
 
 setup(name = 'pyvlfeat', version = __version__,
       requires = ['numpy'],
