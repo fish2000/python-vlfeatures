@@ -9,6 +9,7 @@
 extern "C" {
 #include <vl/mathop.h>
 #include <vl/sift.h>
+#include <vl/generic.h>
 }
 
 #include <math.h>
@@ -119,18 +120,8 @@ PyObject * vl_sift_python(
 	assert(opt_norm_thresh==-1 || opt_norm_thresh>=0);
 	assert(opt_magnif==-1 || opt_magnif>=0);
 
-	enum
-	{
-		IN_I = 0, IN_END
-	};
-	enum
-	{
-		OUT_FRAMES = 0, OUT_DESCRIPTORS
-	};
-
 	int verbose = opt_verbose;
 	int opt;
-	int next = IN_END;
 
 	vl_sift_pix const *data;
 	int M, N;
@@ -162,7 +153,6 @@ PyObject * vl_sift_python(
 	M = image.dimensions[0];
 	N = image.dimensions[1];
 
-
 	// get input frames and sort them w.r.t scale
 	if (opt_frames.nd > 1)
 	{
@@ -184,7 +174,9 @@ PyObject * vl_sift_python(
 		double *frames = NULL;
 		vl_uint8 *descr = NULL;
 
-		int nframes = 0, reserved = 0, i, j, q;
+		int nframes = 0;
+        int reserved = 0;
+        int i, j, q;
 
 		/* create a filter to process the image */
 		filt = vl_sift_new(M, N, O, S, o_min);
@@ -201,37 +193,30 @@ PyObject * vl_sift_python(
 			vl_sift_set_window_size(filt, window_size);
 
 		if (verbose) {
+            printf ("Version: libvl %s\n", vl_get_version_string()) ;
 			printf("siftmx: filter settings:\n");
-			printf(
-				"siftmx:   octaves      (O)      = %d\n", vl_sift_get_noctaves(
-					filt));
-			printf(
-				"siftmx:   levels       (S)      = %d\n", vl_sift_get_nlevels(
-					filt));
-			printf(
-				"siftmx:   first octave (o_min)  = %d\n",
-				vl_sift_get_octave_first(filt));
-			printf(
-				"siftmx:   edge thresh           = %g\n",
-				vl_sift_get_edge_thresh(filt));
-			printf(
-				"siftmx:   peak thresh           = %g\n",
-				vl_sift_get_peak_thresh(filt));
-			printf(
-				"siftmx:   norm thresh           = %g\n",
-				vl_sift_get_norm_thresh(filt));
-			printf(
-				"siftmx:   magnif                = %g\n", vl_sift_get_magnif(
-					filt));
-			printf(
-				"siftmx:   window size           = %g\n",
-				vl_sift_get_window_size(filt));
-			printf(
-				(nikeys >= 0) ? "siftmx: will source frames? yes (%d read)\n"
-						: "siftmx: will source frames? no\n", nikeys);
-			printf(
-				"siftmx: will force orientations? %s\n",
-				force_orientations ? "yes" : "no");
+			printf("siftmx:   octaves      (O)      = %d\n",
+                    vl_sift_get_noctaves(filt));
+			printf("siftmx:   levels       (S)      = %d\n",
+                    vl_sift_get_nlevels(filt));
+			printf("siftmx:   first octave (o_min)  = %d\n",
+                    vl_sift_get_octave_first(filt));
+			printf("siftmx:   edge thresh           = %g\n",
+                    vl_sift_get_edge_thresh(filt));
+			printf("siftmx:   peak thresh           = %g\n",
+                    vl_sift_get_peak_thresh(filt));
+			printf("siftmx:   norm thresh           = %g\n",
+                    vl_sift_get_norm_thresh(filt));
+			printf("siftmx:   magnif                = %g\n",
+                    vl_sift_get_magnif(filt));
+			printf("siftmx:   window size           = %g\n",
+                    vl_sift_get_window_size(filt));
+			printf((nikeys >= 0) 
+                    ? 
+                    "siftmx: will source frames? yes (%d read)\n"
+                    : "siftmx: will source frames? no\n", nikeys);
+			printf("siftmx: will force orientations? %s\n",
+                    force_orientations ? "yes" : "no");
 
 		}
 
@@ -245,12 +230,6 @@ PyObject * vl_sift_python(
 			VlSiftKeypoint const *keys = 0;
 			int nkeys = 0;
 
-			if (verbose) {
-				printf(
-					"siftmx: processing octave %d\n", vl_sift_get_octave_index(
-						filt));
-			}
-
 			/* Calculate the GSS for the next octave .................... */
 			if (first) {
 				err = vl_sift_process_first_octave(filt, data);
@@ -262,11 +241,11 @@ PyObject * vl_sift_python(
 			if (err)
 				break;
 
-//			if (verbose) {
-//				printf(
-//					"siftmx: GSS octave %d computed\n",
-//					vl_sift_get_octave_index(filt));
-//			}
+			if (verbose) {
+				printf(
+					"siftmx: GSS octave %d computed\n",
+					vl_sift_get_octave_index(filt));
+			}
 
 			/* Run detector ............................................. */
 			if (nikeys < 0) {
@@ -307,10 +286,10 @@ PyObject * vl_sift_python(
 
 					/* optionally compute orientations too */
 					if (force_orientations) {
-						nangles = vl_sift_calc_keypoint_orientations(
-							filt, angles, k);
+						nangles = 
+                            vl_sift_calc_keypoint_orientations(filt, angles, k);
 					} else {
-						angles[0] = VL_PI / 2 - ikeys[4 * i + 3];
+						angles[0] = ikeys[4 * i + 3];
 						nangles = 1;
 					}
 				} else {
@@ -322,14 +301,14 @@ PyObject * vl_sift_python(
 				/* For each orientation ................................... */
 				for (q = 0; q < nangles; ++q) {
 					vl_sift_pix buf[128];
-					vl_sift_pix rbuf[128];
+					//vl_sift_pix rbuf[128];
 
 					/* compute descriptor (if necessary) */
 					//if (nout > 1) {
 
 
 					vl_sift_calc_keypoint_descriptor(filt, buf, k, angles[q]);
-					transpose_descriptor(rbuf, buf);
+					//transpose_descriptor(rbuf, buf);
 
 					//}
 					/* make enough room for all these keypoints and more */
@@ -346,14 +325,15 @@ PyObject * vl_sift_python(
 					frames[4 * nframes + 0] = k -> y;
 					frames[4 * nframes + 1] = k -> x;
 					frames[4 * nframes + 2] = k -> sigma;
-					frames[4 * nframes + 3] = VL_PI / 2 - angles[q];
+					frames[4 * nframes + 3] = angles[q];
 
 					for (j = 0; j < 128; ++j) {
-						double x = 512.0 * rbuf[j];
+                        printf(" %f ", buf[j]);
+						double x = 512.0 * buf[j];
 						x = (x < 255.0) ? x : 255.0;
 						descr[128 * nframes + j] = (vl_uint8) (x);
 					}
-					//}
+                    printf("\n\n");
 
 					++nframes;
 				} /* next orientation */

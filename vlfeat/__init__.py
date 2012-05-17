@@ -4,7 +4,7 @@ from quickshift import vl_quickseg,vl_quickvis
 
 def vl_sift(
 		data, 
-		frames=numpy.zeros(1), 
+		frames=None,
 		octaves=-1, 
 		levels=-1, 
 		first_octave=0,
@@ -51,9 +51,16 @@ def vl_sift(
 	@param verbose      Be verbose (may be repeated to increase the verbosity
 	                    level). 
 	"""
+    if frames is None:
+        frames = numpy.zeros(1)
+
+    if not frames.dtype is numpy.float64:
+        frames = numpy.array(frames)
+
 	if not data.flags['F_CONTIGUOUS']:
 		data = numpy.array(data, order='F')		
-	if not frames.flags['F_CONTIGUOUS']:
+	
+    if not frames.flags['F_CONTIGUOUS']:
 		frames = numpy.array(frames, order='F')
 		
 	return _vlfeat.vl_sift(data, frames, octaves, levels, first_octave, 

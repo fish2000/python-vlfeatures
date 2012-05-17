@@ -14,6 +14,7 @@ Requirements
 
 OSX
 ---
+
 [Homebrew](http://mxcl.github.com/homebrew/) gives you boost via ```brew install boost```.
 ```setup.py``` should work for both a homebrew based an
 macports based system. I need to run
