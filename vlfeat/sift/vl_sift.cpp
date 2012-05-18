@@ -328,12 +328,10 @@ PyObject * vl_sift_python(
 					frames[4 * nframes + 3] = angles[q];
 
 					for (j = 0; j < 128; ++j) {
-                        printf(" %f ", buf[j]);
 						double x = 512.0 * buf[j];
 						x = (x < 255.0) ? x : 255.0;
 						descr[128 * nframes + j] = (vl_uint8) (x);
 					}
-                    printf("\n\n");
 
 					++nframes;
 				} /* next orientation */
