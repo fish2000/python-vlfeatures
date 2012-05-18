@@ -301,17 +301,9 @@ PyObject * vl_sift_python(
 				/* For each orientation ................................... */
 				for (q = 0; q < nangles; ++q) {
 					vl_sift_pix buf[128];
-					//vl_sift_pix rbuf[128];
-
-					/* compute descriptor (if necessary) */
-					//if (nout > 1) {
-
-
 					vl_sift_calc_keypoint_descriptor(filt, buf, k, angles[q]);
-					//transpose_descriptor(rbuf, buf);
-
-					//}
-					/* make enough room for all these keypoints and more */
+					
+                    /* make enough room for all these keypoints and more */
 					if (reserved < nframes + 1) {
 						reserved += 2 * nkeys;
 						frames = (double *) realloc(frames, 4 * sizeof(double)
@@ -319,9 +311,8 @@ PyObject * vl_sift_python(
 						descr = (vl_uint8 *) realloc(descr, 128
 								* sizeof(vl_uint8) * reserved);
 					}
-
-					/* Save back with MATLAB conventions. Notice that the input
-					 * image was the transpose of the actual image. */
+                    
+                    // save descriptor information with swapped y and x values
 					frames[4 * nframes + 0] = k -> y;
 					frames[4 * nframes + 1] = k -> x;
 					frames[4 * nframes + 2] = k -> sigma;
