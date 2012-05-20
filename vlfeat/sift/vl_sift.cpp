@@ -7,15 +7,15 @@
 #include "../py_vlfeat.h"
 
 extern "C" {
-    #include < vl / mathop.h >
-    #include < vl / sift.h >
-    #include < vl / generic.h >
+    #include <vl/mathop.h>
+    #include <vl/sift.h>
+    #include <vl/generic.h>
 }
 
-#include < math.h >
-#include < assert.h >
+#include <math.h>
+#include <assert.h>
 
-#include < iostream >
+#include <iostream>
 
 /** ------------------------------------------------------------------
  ** @internal
@@ -321,9 +321,9 @@ int opt_verbose)
                     }
 
                     // save descriptor information with swapped y and x values
-                    frames[4 * nframes + 0] = k - >y;
-                    frames[4 * nframes + 1] = k - >x;
-                    frames[4 * nframes + 2] = k - >sigma;
+                    frames[4 * nframes + 0] = k->y;
+                    frames[4 * nframes + 1] = k->x;
+                    frames[4 * nframes + 2] = k->sigma;
                     frames[4 * nframes + 3] = angles[q];
 
                     for (j = 0; j < 128; ++j) {
