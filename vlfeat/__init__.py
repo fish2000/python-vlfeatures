@@ -2,20 +2,13 @@ import _vlfeat
 import numpy
 from quickshift import vl_quickseg,vl_quickvis
 
-def vl_sift(
-		data, 
-		frames=numpy.zeros(1), 
-		octaves=-1, 
-		levels=-1, 
-		first_octave=0,
-		peak_thresh=-1.0, 
-		edge_thresh=-1.0,
-		norm_thresh=-1.0,
-		magnif=-1.0,
-		window_size=-1.0,
-		orientations=False,
-		verbose=0):
-	""" Computes the SIFT frames [1] (keypoints) F of the image I. I is a 
+
+def vl_sift(data, frames=None, 
+        octaves=-1, levels=-1, first_octave=0, 
+        peak_thresh=-1.0, edge_thresh=-1.0, norm_thresh=-1.0, 
+        magnif=-1.0, window_size=-1.0, orientations=False, 
+        verbose=0):
+    """Computes the SIFT frames [1] (keypoints) F of the image I. I is a 
 	gray-scale image in single precision. Each column of F is a feature frame 
 	and has the format [X;Y;S;TH], where X,Y is the (fractional) center of the 
 	frame, S is the scale and TH is the orientation (in radians). 
@@ -50,15 +43,28 @@ def vl_sift(
 	                    orientation specified by the 'Frames' option.
 	@param verbose      Be verbose (may be repeated to increase the verbosity
 	                    level). 
-	"""
-	if not data.flags['F_CONTIGUOUS']:
-		data = numpy.array(data, order='F')		
-	if not frames.flags['F_CONTIGUOUS']:
-		frames = numpy.array(frames, order='F')
-		
-	return _vlfeat.vl_sift(data, frames, octaves, levels, first_octave, 
-						peak_thresh, edge_thresh, norm_thresh, magnif,
-						window_size, orientations, verbose)
+    """
+    if frames is None:
+        frames = numpy.zeros(1)
+        
+    if not frames.dtype is numpy.float64:
+        frames = numpy.array(frames)
+        
+    if not data.dtype is numpy.float32:
+        data = numpy.array(data, dtype=numpy.float32)
+    
+    if not data.flags['F_CONTIGUOUS']:
+        print "Not F"
+        data = numpy.array(data, order='F')
+        print data.dtype
+	
+    if not frames.flags['F_CONTIGUOUS']:
+        frames = numpy.array(frames, order='F')
+    
+    return _vlfeat.vl_sift(data, frames, octaves, levels, first_octave,
+            peak_thresh, edge_thresh, norm_thresh, magnif,
+            window_size, orientations, verbose)
+
 
 def vl_mser(
 		data, 
