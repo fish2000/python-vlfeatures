@@ -46,20 +46,19 @@ def vl_sift(data, frames=None,
     """
     if frames is None:
         frames = numpy.zeros(1)
-        
-    if not frames.dtype is numpy.float64:
-        frames = numpy.array(frames)
-        
+    else:
+        d, _  = frames.shape
+        assert d==4, "Frames must have shape (4, ?)"
+        if not frames.dtype is numpy.float64:
+            frames = numpy.array(frames)
+        if not frames.flags['F_CONTIGUOUS']:
+            frames = numpy.array(frames, order='F')
+       
     if not data.dtype is numpy.float32:
         data = numpy.array(data, dtype=numpy.float32)
     
     if not data.flags['F_CONTIGUOUS']:
-        print "Not F"
         data = numpy.array(data, order='F')
-        print data.dtype
-	
-    if not frames.flags['F_CONTIGUOUS']:
-        frames = numpy.array(frames, order='F')
     
     return _vlfeat.vl_sift(data, frames, octaves, levels, first_octave,
             peak_thresh, edge_thresh, norm_thresh, magnif,
